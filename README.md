@@ -1,17 +1,21 @@
-# React + Vite
+# Pham Hoang Vi Dai — Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A single-page portfolio for a third-year Software Engineering student at FPT University, focused on backend and Node.js development.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```sh
+npm install
+npm run dev
+```
 
-## React Compiler
+## Verify
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```sh
+npm run lint
+npm run build
+```
 
-## Expanding the ESLint configuration
+The site uses React, Vite, Framer Motion, Three.js, and React Three Fiber. The 3D hero is loaded in a separate chunk and has a CSS fallback if WebGL is unavailable.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# dai-portfolio
+The ParkMaster preview is a screenshot of the live product at `parkmaster.vercel.app`. The IVS HR Systems preview comes from the local resource-request HTML prototype and contains sample data; it is labeled accordingly on the site. Project descriptions are grounded in the existing portfolio, the live ParkMaster site, and the local `internal-hr-system` project documentation.

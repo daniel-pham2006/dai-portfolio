@@ -1,376 +1,537 @@
-import { useEffect, useMemo, useState } from 'react'
-import fptLogo from './assets/fpt-education.png'
-import heroArt from './assets/hero.png'
-import './App.css'
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import fptLogo from "./assets/fpt-education.png";
+import parkmasterImage from "./assets/parkmaster-home.png";
+import ivsImage from "./assets/ivs-requests.png";
+import Cursor from "./components/Cursor";
+import Playground from "./components/Playground";
+import "./App.css";
 
-const profile = {
-  name: 'Pham Hoang Vi Dai',
-  role: 'Backend / Node.js Developer Intern',
-  phone: '0842440406',
-  email: 'phamhoangvidai2006@gmail.com',
-  facebook: 'https://www.facebook.com/vi.ai.162729',
-  github: 'https://github.com/daniel-pham2006',
-  linkedin: '',
-}
+const HeroScene = lazy(() => import("./components/HeroScene"));
 
-const navItems = [
-  { id: 'top', label: 'Home' },
-  { id: 'profile', label: 'Profile' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'contact', label: 'Contact' },
-]
+const person = {
+  name: "Pham Hoang Vi Dai",
+  email: "phamhoangvidai2006@gmail.com",
+  phone: "0842440406",
+  github: "https://github.com/daniel-pham2006",
+  facebook: "https://www.facebook.com/vi.ai.162729",
+};
 
-const skillGroups = [
-  {
-    label: 'Backend',
-    items: ['Node.js', 'Express.js', 'RESTful APIs', 'JWT', 'Java'],
-  },
-  {
-    label: 'Database',
-    items: ['PostgreSQL', 'SQL basics', 'Data modeling basics'],
-  },
-  {
-    label: 'Frontend',
-    items: ['ReactJS', 'JavaScript ES6+', 'HTML5', 'CSS3'],
-  },
-  {
-    label: 'Testing',
-    items: ['API testing', 'Manual testing', 'Debugging'],
-  },
-  {
-    label: 'Tools',
-    items: ['Git', 'GitHub', 'Docker basics', 'Vite', 'VS Code'],
-  },
-]
-
-const focusItems = [
-  'Build maintainable backend APIs with clear routes, predictable data flow, and readable code.',
-  'Understand frontend integration needs so API contracts are practical for product screens.',
-  'Learn quickly from code review, testing feedback, and real engineering workflows.',
-]
-
-const profileFacts = [
-  ['University', 'FPT University'],
-  ['Year', '3rd-year Software Engineering student'],
-  ['Direction', 'Backend / Node.js Development'],
-  ['Looking for', 'Backend Developer Intern position'],
-]
+const navigation = [
+  ["about", "About"],
+  ["work", "Work"],
+  ["skills", "Skills"],
+  ["playground", "Lab"],
+  ["contact", "Contact"],
+];
 
 const projects = [
   {
-    title: 'ParkMaster',
-    badge: 'Main project',
-    desc: 'Parking building management system for facilities, vehicles, reservations, and payments.',
-    stack: ['React', 'Node.js', 'Express', 'PostgreSQL', 'JWT'],
-    live: 'https://parkmaster.vercel.app/',
-    github: profile.github,
-    featured: true,
+    number: "01",
+    title: "ParkMaster",
+    subtitle: "Parking building management system",
+    category: "Live product · Parking operations",
+    image: parkmasterImage,
+    imageAlt: "ParkMaster live website showing its smart parking homepage",
+    imageNote: "Screenshot from the live ParkMaster website",
+    intro:
+      "A connected parking experience for drivers and the people operating multi-level facilities. The product brings reservation, arrival, active sessions and checkout into one flow.",
+    context:
+      "Drivers need to know where space is available and complete a parking visit without unnecessary steps. Operators need a shared view of occupancy, reservations and payments.",
+    features: [
+      "Reserve a space and see live availability across buildings, floors and zones",
+      "AI-assisted slot scoring and assignment based on vehicle fit, capacity and distance",
+      "Track parking sessions, payments and monthly passes",
+      "Give staff and managers operational views of arrivals and facility activity",
+    ],
+    engineering:
+      "React connects to Node.js and Express APIs backed by PostgreSQL, with JWT-based authentication. The product also presents an AI allocation flow and operational dashboards.",
+    stack: ["React", "Node.js", "Express", "PostgreSQL", "JWT"],
+    links: [
+      { label: "Visit ParkMaster", href: "https://parkmaster.vercel.app/" },
+    ],
   },
   {
-    title: 'Personal Portfolio',
-    desc: 'A focused portfolio site for internship applications, built with React and Vite as an online CV.',
-    stack: ['React', 'Vite', 'CSS'],
-    github: profile.github,
+    number: "02",
+    title: "IVS HR Systems",
+    subtitle: "Internal workforce operations",
+    category: "Team project · Internal platform",
+    image: ivsImage,
+    imageAlt: "IVS HR Systems resource request prototype with sample data",
+    imageNote: "Resource request prototype · sample data",
+    intro:
+      "An internal workspace that connects employee records, projects, resource allocation and staffing requests. It is designed for HR teams and managers who need a reliable picture of workforce capacity.",
+    context:
+      "Workforce information is spread across employee profiles, contracts, assignments and project demand. The system gives teams one place to review those connected records and act on resource needs.",
+    features: [
+      "Employee profiles, contracts and related history",
+      "Project allocation, planned and actual man-month views, and dashboard summaries",
+      "Excel import with validation and review before confirmation",
+      "Resource request, position and candidate workflows with CV or profile links",
+    ],
+    engineering:
+      "The stack combines a React and TypeScript frontend with TanStack Query, a modular NestJS API, Prisma and PostgreSQL. Docker Compose and Nginx support the application.",
+    contribution: [
+      "Built and iterated the resource-request frontend and its API integration.",
+      "Implemented candidate selection and management flows, CV preview, and related position and candidate APIs.",
+      "Developed soft-plan and allocation views, external-candidate mapping flows, and supporting tests.",
+    ],
+    stack: ["React", "TypeScript", "NestJS", "Prisma", "PostgreSQL"],
+    links: [],
+  },
+];
+
+const skillGroups = [
+  {
+    title: "Backend & APIs",
+    text: "Routes, authentication, data flow and API contracts.",
+    items: ["Node.js", "Express.js", "NestJS", "REST APIs", "JWT", "Java"],
   },
   {
-    title: 'API Integration Practice',
-    desc: 'Small learning exercises for connecting frontend screens with REST APIs and predictable state.',
-    stack: ['REST APIs', 'Fetch', 'React state'],
-    github: profile.github,
+    title: "Data & integration",
+    text: "Relational data and the handoff between systems.",
+    items: ["PostgreSQL", "Prisma", "SQL", "Excel import", "API testing"],
   },
-]
+  {
+    title: "Interfaces",
+    text: "Frontend work that makes the underlying system usable.",
+    items: ["React", "TypeScript", "JavaScript", "HTML", "CSS", "Vite"],
+  },
+  {
+    title: "Workflow",
+    text: "Tools used while building, testing and shipping.",
+    items: ["Git", "GitHub", "Docker", "Debugging", "Manual testing"],
+  },
+];
 
-function getInitialTheme() {
-  if (typeof window === 'undefined') return 'light'
+const ease = [0.22, 1, 0.36, 1];
 
-  const storedTheme = window.localStorage.getItem('portfolio-theme')
-  if (storedTheme === 'dark' || storedTheme === 'light') return storedTheme
+function Reveal({ children, className = "", delay = 0 }) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.7, delay, ease }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+function SectionLabel({ number, children }) {
+  return (
+    <div className="section-label">
+      <span>{number}</span>
+      <span>{children}</span>
+      <i aria-hidden="true" />
+    </div>
+  );
+}
+
+function Project({ project }) {
+  const [open, setOpen] = useState(true);
+  const visual = useRef(null);
+  const reduceMotion = useReducedMotion();
+
+  const move = (event) => {
+    if (
+      reduceMotion ||
+      !visual.current ||
+      !window.matchMedia("(pointer:fine)").matches
+    )
+      return;
+    const bounds = visual.current.getBoundingClientRect();
+    visual.current.style.setProperty(
+      "--project-x",
+      `${((event.clientX - bounds.left) / bounds.width - 0.5) * 5}deg`,
+    );
+    visual.current.style.setProperty(
+      "--project-y",
+      `${((event.clientY - bounds.top) / bounds.height - 0.5) * -5}deg`,
+    );
+  };
+
+  const reset = () => {
+    if (!visual.current) return;
+    visual.current.style.setProperty("--project-x", "0deg");
+    visual.current.style.setProperty("--project-y", "0deg");
+  };
+
+  return (
+    <Reveal className="project">
+      <div className="project-heading">
+        <span>{project.number} / 02</span>
+        <span>{project.category}</span>
+      </div>
+      <div
+        className="project-visual-frame"
+        ref={visual}
+        onPointerMove={move}
+        onPointerLeave={reset}
+      >
+        <img src={project.image} alt={project.imageAlt} loading="lazy" />
+        <span className="project-image-note">{project.imageNote}</span>
+      </div>
+      <div className="project-summary">
+        <div>
+          <p className="project-subtitle">{project.subtitle}</p>
+          <h3>{project.title}</h3>
+          <p className="project-intro">{project.intro}</p>
+        </div>
+        <button
+          className="project-toggle"
+          type="button"
+          aria-expanded={open}
+          aria-controls={`project-${project.number}-details`}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "Close case study" : "Explore case study"}
+          <span aria-hidden="true">{open ? "−" : "↗"}</span>
+        </button>
+      </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            id={`project-${project.number}-details`}
+            className="project-details"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.42, ease }}
+          >
+            <div className="project-details-inner">
+              <div className="detail-block">
+                <span className="detail-number">01 / CONTEXT</span>
+                <p>{project.context}</p>
+              </div>
+              <div className="detail-block">
+                <span className="detail-number">02 / PRODUCT</span>
+                <ul>
+                  {project.features.map((feature) => (
+                    <li key={feature}>{feature}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="detail-block">
+                <span className="detail-number">03 / ENGINEERING</span>
+                <p>{project.engineering}</p>
+                <div className="stack-tags">
+                  {project.stack.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              </div>
+              {project.contribution && (
+                <div className="detail-block contribution-block">
+                  <span className="detail-number">04 / MY CONTRIBUTION</span>
+                  <ul>
+                    {project.contribution.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {project.links.length > 0 && (
+                <div className="project-actions">
+                  {project.links.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {link.label} <span aria-hidden="true">↗</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Reveal>
+  );
 }
 
 function App() {
-  const [theme, setTheme] = useState(getInitialTheme)
-  const [activeSection, setActiveSection] = useState('top')
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const themeLabel = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-
-  const socialLinks = useMemo(
-    () => [
-      { label: 'GitHub', href: profile.github },
-      { label: 'LinkedIn', href: profile.linkedin },
-      { label: 'Email', href: `mailto:${profile.email}` },
-    ],
-    [],
-  )
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive] = useState("top");
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    window.localStorage.setItem('portfolio-theme', theme)
-  }, [theme])
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 12)
-    handleScroll()
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    const sections = navItems
-      .map((item) => document.getElementById(item.id))
-      .filter(Boolean)
-
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries
+        const current = entries
           .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-
-        if (visible?.target?.id) {
-          setActiveSection(visible.target.id)
-        }
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (current) setActive(current.target.id);
       },
-      {
-        rootMargin: '-22% 0px -58% 0px',
-        threshold: [0.18, 0.35, 0.6],
-      },
-    )
+      { rootMargin: "-28% 0px -48% 0px", threshold: [0, 0.25, 0.5] },
+    );
+    document.querySelectorAll("main > section[id]").forEach((section) => {
+      observer.observe(section);
+    });
+    return () => observer.disconnect();
+  }, []);
 
-    sections.forEach((section) => observer.observe(section))
-    return () => observer.disconnect()
-  }, [])
+  useEffect(() => {
+    document.body.classList.toggle("menu-open", menuOpen);
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.classList.remove("menu-open");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   return (
-    <main>
-      <nav
-        className={`site-nav ${isScrolled ? 'is-scrolled' : ''}`}
-        aria-label="Main navigation"
-      >
-        <a className="brand-mark" href="#top" aria-label="Back to top">
-          VD
-        </a>
-
-        <div
-          className={`nav-links ${isMenuOpen ? 'is-open' : ''}`}
-          id="mobile-navigation"
+    <>
+      <Cursor />
+      <header className="site-header">
+        <a
+          className="wordmark"
+          href="#top"
+          aria-label="Pham Hoang Vi Dai, back to top"
         >
-          {navItems.map((item) => (
+          vd<span>.</span>
+          <small>PHAM HOANG VI DAI</small>
+        </a>
+        <nav
+          id="main-nav"
+          className={`main-nav ${menuOpen ? "open" : ""}`}
+          aria-label="Main navigation"
+        >
+          {navigation.map(([id, label]) => (
             <a
-              key={item.id}
-              href={`#${item.id}`}
-              className={activeSection === item.id ? 'is-active' : ''}
-              aria-current={activeSection === item.id ? 'page' : undefined}
-              onClick={() => setIsMenuOpen(false)}
+              href={`#${id}`}
+              key={id}
+              className={active === id ? "active" : ""}
+              onClick={() => setMenuOpen(false)}
             >
-              {item.label}
+              {label}
             </a>
           ))}
-        </div>
-
-        <div className="nav-actions">
+        </nav>
+        <div className="header-end">
+          <span className="availability">
+            <i /> Open to backend internships
+          </span>
           <button
-            className="theme-toggle"
+            className={`menu-button ${menuOpen ? "open" : ""}`}
             type="button"
-            aria-label={themeLabel}
-            aria-pressed={theme === 'dark'}
-            onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="main-nav"
+            onClick={() => setMenuOpen((value) => !value)}
           >
-            <span className="theme-toggle-track" aria-hidden="true">
-              <span className="theme-toggle-thumb" />
-            </span>
-          </button>
-
-          <button
-            className="menu-toggle"
-            type="button"
-            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setIsMenuOpen((current) => !current)}
-          >
-            <span />
             <span />
             <span />
           </button>
         </div>
-      </nav>
+      </header>
 
-      <section className="hero-section" id="top">
-        <div className="hero-copy page-load">
-          <p className="intro-line">Software Engineering Student</p>
-          <h1>{profile.name}</h1>
-          <p className="role-line">{profile.role}</p>
-          <p className="lead">
-            I am a 3rd-year Software Engineering student at FPT University,
-            focused on backend development with Node.js, Express, RESTful APIs,
-            PostgreSQL, and clean teamwork habits for internship-ready projects.
-          </p>
-
-          <div className="hero-actions" aria-label="Primary actions">
-            <a className="button button-primary" href="#projects">
-              View projects
-            </a>
-            <a className="button button-secondary" href={profile.github} target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-            <a className="button button-ghost" href={`mailto:${profile.email}`}>
-              Contact
-            </a>
-          </div>
-
-          <div className="hero-socials" aria-label="Profile links">
-            {socialLinks.map((link) =>
-              link.href ? (
-                <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel={link.href.startsWith('http') ? 'noreferrer' : undefined}>
-                  {link.label}
+      <main>
+        <section className="hero" id="top">
+          <div className="hero-inner">
+            <Reveal className="hero-content">
+              <p className="hero-eyebrow">
+                Pham Hoang Vi Dai <span>/</span> Software Engineering
+              </p>
+              <h1>
+                Building systems that make everyday work <em>easier.</em>
+              </h1>
+              <p className="hero-description">
+                I’m Đại, a third-year student at FPT University focused on
+                backend development. My work spans parking operations, internal
+                HR tools and the interfaces that connect people to those
+                systems.
+              </p>
+              <div className="hero-actions">
+                <a className="primary-link" href="#work">
+                  See selected work <span>↗</span>
                 </a>
-              ) : (
-                <span key={link.label} className="link-placeholder" aria-label={`${link.label} link not added yet`}>
-                  {link.label}
-                </span>
-              ),
-            )}
-          </div>
-        </div>
-
-        <aside className="profile-panel page-load" aria-label="Quick profile">
-          <div className="hero-art-wrap">
-            <img src={heroArt} alt="Layered backend architecture illustration" />
-          </div>
-          <div className="education-logo-wrap">
-            <img src={fptLogo} alt="FPT Education logo" />
-          </div>
-          <dl className="profile-facts">
-            {profileFacts.map(([label, value]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{value}</dd>
+                <a className="secondary-link" href={`mailto:${person.email}`}>
+                  Get in touch <span>↗</span>
+                </a>
               </div>
-            ))}
-          </dl>
-        </aside>
-      </section>
-
-      <section className="section-grid reveal" id="profile">
-        <div className="section-heading">
-          <p>Profile</p>
-          <h2>Backend intern profile with practical product awareness.</h2>
-        </div>
-        <div className="summary-block">
-          <p>
-            My current goal is to grow in a professional engineering environment
-            where I can contribute to backend services, understand real product
-            constraints, and improve through code review and team feedback.
-          </p>
-          <ul>
-            {focusItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="section-grid skill-section reveal" id="skills">
-        <div className="section-heading">
-          <p>Skills</p>
-          <h2>Core tools grouped around backend internship work.</h2>
-        </div>
-        <div className="skill-groups">
-          {skillGroups.map((group) => (
-            <section className="skill-group" key={group.label}>
-              <h3>{group.label}</h3>
-              <div className="skill-list" aria-label={`${group.label} skills`}>
-                {group.items.map((skill) => (
-                  <span key={skill}>{skill}</span>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
-
-      <section className="work-section reveal" id="projects">
-        <div className="section-heading wide">
-          <p>Projects</p>
-          <h2>Selected work, led by the project most relevant to backend review.</h2>
-        </div>
-        <div className="work-list">
-          {projects.map((item) => (
-            <article
-              className={`work-card ${item.featured ? 'is-featured' : ''}`}
-              key={item.title}
+            </Reveal>
+            <div
+              className="hero-object"
+              aria-label="Interactive abstract sculpture"
             >
-              <div className="card-topline">
-                {item.badge ? <span className="project-badge">{item.badge}</span> : null}
-                <span>{item.stack.join(' / ')}</span>
+              <Suspense
+                fallback={
+                  <div className="scene-fallback" aria-hidden="true">
+                    <div className="fallback-ring" />
+                  </div>
+                }
+              >
+                <HeroScene />
+              </Suspense>
+              <span className="object-caption">
+                An exploration in form and motion
+              </span>
+            </div>
+          </div>
+          <div className="hero-foot">
+            <span>FPT University · Vietnam</span>
+            <a href="#about">
+              Scroll to explore <span>↓</span>
+            </a>
+          </div>
+        </section>
+
+        <section className="about-section section" id="about">
+          <SectionLabel number="01">About & education</SectionLabel>
+          <div className="about-layout">
+            <Reveal>
+              <h2 className="section-title">
+                Curious about how things work. Careful about how they feel.
+              </h2>
+            </Reveal>
+            <Reveal className="about-story" delay={0.1}>
+              <p>
+                I study Software Engineering at FPT University and am working
+                toward a Backend / Node.js Developer internship. I enjoy turning
+                complex workflows into clear APIs, dependable data structures
+                and usable screens.
+              </p>
+              <p>
+                ParkMaster and IVS HR Systems show the kind of problems I
+                gravitate toward: connecting many steps of a real operation
+                without losing sight of the people using it.
+              </p>
+              <div className="about-principles">
+                <div>
+                  <span>01</span>
+                  <p>Readable code and predictable data flow</p>
+                </div>
+                <div>
+                  <span>02</span>
+                  <p>API contracts that make frontend integration practical</p>
+                </div>
+                <div>
+                  <span>03</span>
+                  <p>Learning through testing, review and team feedback</p>
+                </div>
               </div>
-              <h3>{item.title}</h3>
-              <p>{item.desc}</p>
-              <div className="project-stack" aria-label={`${item.title} tech stack`}>
-                {item.stack.map((tech) => (
-                  <span key={tech}>{tech}</span>
-                ))}
+            </Reveal>
+          </div>
+          <Reveal className="education-band">
+            <div className="education-logo">
+              <img
+                src={fptLogo}
+                alt="FPT Education — Trường Đại học FPT"
+                loading="lazy"
+              />
+            </div>
+            <div>
+              <span className="mini-label">EDUCATION</span>
+              <strong>FPT University</strong>
+              <p>Third-year Software Engineering student</p>
+            </div>
+            <span className="education-index">/ 2026</span>
+          </Reveal>
+        </section>
+
+        <section className="work-section section" id="work">
+          <SectionLabel number="02">Selected work</SectionLabel>
+          <Reveal className="work-heading">
+            <h2 className="section-title">
+              Projects with real workflows behind them.
+            </h2>
+            <p>
+              Two systems built around daily operations: one for parking, one
+              for workforce planning. Explore the product, the technical
+              structure and the features each brings together.
+            </p>
+          </Reveal>
+          <div className="project-list">
+            {projects.map((project) => (
+              <Project project={project} key={project.title} />
+            ))}
+          </div>
+          <div className="other-work">
+            <span>ALSO BUILT</span>
+            <p>
+              This portfolio — a React and Vite site for presenting my work and
+              experimenting with interaction.
+            </p>
+            <a href={person.github} target="_blank" rel="noreferrer">
+              More on GitHub ↗
+            </a>
+          </div>
+        </section>
+
+        <section className="skills-section section" id="skills">
+          <SectionLabel number="03">Skills & tools</SectionLabel>
+          <Reveal className="skills-heading">
+            <h2 className="section-title">A toolkit shaped by building.</h2>
+            <p>Technologies from my portfolio and the projects shown above.</p>
+          </Reveal>
+          <div className="skills-grid">
+            {skillGroups.map((group, index) => (
+              <Reveal
+                className="skill-group"
+                key={group.title}
+                delay={index * 0.05}
+              >
+                <span className="skill-index">0{index + 1}</span>
+                <h3>{group.title}</h3>
+                <p>{group.text}</p>
+                <div className="skill-tags">
+                  {group.items.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        <Playground />
+
+        <section className="contact-section" id="contact">
+          <div className="contact-inner">
+            <SectionLabel number="05">Contact</SectionLabel>
+            <Reveal>
+              <p className="contact-prelude">
+                Open to Backend / Node.js internship opportunities
+              </p>
+              <h2>
+                Have a project in mind? <em>Let’s talk.</em>
+              </h2>
+              <a className="contact-email" href={`mailto:${person.email}`}>
+                {person.email} <span>↗</span>
+              </a>
+            </Reveal>
+            <footer>
+              <div>
+                <strong>Pham Hoang Vi Dai</strong>
+                <span>Software Engineering · FPT University</span>
               </div>
-              <div className="project-links">
-                <a href={item.github} target="_blank" rel="noreferrer">
-                  GitHub
+              <div className="footer-links">
+                <a href={`tel:${person.phone}`}>{person.phone}</a>
+                <a href={person.github} target="_blank" rel="noreferrer">
+                  GitHub ↗
                 </a>
-                {item.live ? (
-                  <a href={item.live} target="_blank" rel="noreferrer">
-                    Live Demo
-                  </a>
-                ) : null}
+                <a href={person.facebook} target="_blank" rel="noreferrer">
+                  Facebook ↗
+                </a>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="education-section reveal" id="education">
-        <div>
-          <p className="section-label">Education</p>
-          <h2>FPT University · Software Engineering</h2>
-        </div>
-        <p>
-          Currently in the 3rd year, focusing on backend fundamentals, API
-          design, database usage, frontend integration, and practical teamwork
-          habits needed in a software engineering environment.
-        </p>
-      </section>
-
-      <section className="contact-section reveal" id="contact">
-        <div>
-          <p className="section-label">Contact</p>
-          <h2>Available for Backend / Node.js internship opportunities.</h2>
-        </div>
-        <div className="contact-links">
-          <a href={`mailto:${profile.email}`}>
-            <span>Email</span>
-            <strong>{profile.email}</strong>
-          </a>
-          <a href={`tel:${profile.phone}`}>
-            <span>Phone</span>
-            <strong>{profile.phone}</strong>
-          </a>
-          <a href={profile.github} target="_blank" rel="noreferrer">
-            <span>GitHub</span>
-            <strong>daniel-pham2006</strong>
-          </a>
-          <a href={profile.facebook} target="_blank" rel="noreferrer">
-            <span>Facebook</span>
-            <strong>vi.ai.162729</strong>
-          </a>
-        </div>
-      </section>
-    </main>
-  )
+              <a className="back-top" href="#top">
+                Back to top ↑
+              </a>
+            </footer>
+          </div>
+        </section>
+      </main>
+    </>
+  );
 }
 
-export default App
+export default App;
